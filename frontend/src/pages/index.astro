@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	<button id="btn-signup">Sign Up</button>
+	<button id="btn-login">Log In</button>
+</Layout>
+
+<script>
+	const signup = document.querySelector("#btn-signup") as HTMLButtonElement
+	const login = document.querySelector("#btn-login") as HTMLButtonElement
+
+	signup?.addEventListener('click', async () => {
+		window.location.href = "/register"
+	})
+
+	login?.addEventListener('click', async () => {
+		window.location.href = "/login"
+	})
+</script>

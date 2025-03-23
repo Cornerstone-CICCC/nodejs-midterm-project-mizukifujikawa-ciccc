@@ -32,7 +32,6 @@ const getItems = (req, res) => {
  * @returns {void} Returns one item.
  */
 const getItemById = (req, res) => {
-    console.log('getItemById');
     const { id } = req.params;
     const item = item_model_1.default.findById(id);
     if (!item) {
@@ -50,7 +49,6 @@ const getItemById = (req, res) => {
  */
 const getItemByTitle = (req, res) => {
     const { title } = req.params;
-    console.log('getItemByTitle');
     const item = item_model_1.default.findByTitle(title);
     if (!item) {
         res.status(404).send('Item not found!');

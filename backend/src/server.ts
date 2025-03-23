@@ -24,7 +24,7 @@ if (!SIGN_KEY || !ENCRYPT_KEY) {
 app.use(cookieSession({
   name: 'session',
   keys: [SIGN_KEY, ENCRYPT_KEY],
-  maxAge: 5 * 60 * 1000
+  maxAge: 60 * 60 * 1000
 }))
 
 // Routes

@@ -119,17 +119,19 @@ const deleteUserById = (req, res) => {
 const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password } = req.body;
     if (!username || !password) {
-        res.status(500).send("Username/password is missing!");
+        res.status(400).json({ message: 'Username and password are required' });
         return;
     }
     const user = yield user_model_1.default.checkUserPass(username, password);
-    if (!user) {
-        res.status(500).send("Login details are incorrect!");
+    if (user.isFailure()) {
+        console.error(`Login failed: ${user.error.message}`);
+        res.status(401).send("Login details are incorrect!");
         return;
     }
     if (req.session) {
+        console.log('req.session');
         req.session.isLoggedIn = true;
-        req.session.username = user.username;
+        req.session.username = user.value.username;
     }
     res.status(200).send("Successfully logged in!");
 });
@@ -148,6 +150,7 @@ const logoutUser = (req, res) => {
 };
 const checkCookie = (req, res) => {
     if (req.session && req.session.username) {
+        console.log("checkCookie");
         const username = req.session.username;
         const user = user_model_1.default.findByUsername(username);
         if (!user) {
@@ -156,7 +159,8 @@ const checkCookie = (req, res) => {
         }
         res.status(200).json({
             content: req.session.message,
-            user: user
+            user: user,
+            isLoggedIn: true
         });
         return;
     }

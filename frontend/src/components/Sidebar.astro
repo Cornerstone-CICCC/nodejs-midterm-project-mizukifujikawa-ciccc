@@ -1,0 +1,88 @@
+<div class="sidebar">
+    <h2>Menu</h2>
+    <ul class="menu">
+        <li>Recently</li>
+        <li>Famous</li>
+        <li>My List</li>
+        <li><button class="btn btn-logout">Log out</button></li>
+    </ul>
+</div>
+
+<style>
+    .sidebar {
+        width: 250px;
+        background: #f8f8f8;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+    .sidebar h2 {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+    .menu {
+        list-style: none;
+        padding: 0;
+    }
+    .menu li {
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        font-size: 16px;
+    }
+    .menu li:hover {
+        background: #e0e0e0;
+    }
+
+    .menu button {
+        padding: 0;
+        width: 100%;
+        text-align: left;
+        border: none;
+        background: none;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+    let isDropdownOpen = false;
+    const dropdown = document.querySelector(".dropdown-btn") as HTMLButtonElement;
+    const btnLogout = document.querySelector(".menu .btn-logout") as HTMLButtonElement;
+
+    const toggleDropdown = () => {
+        const menu = document.querySelector(".dropdown-menu") as HTMLElement;
+        isDropdownOpen = !isDropdownOpen;
+        if(menu){
+            menu.style.display = isDropdownOpen ? "block" : "none";
+        }
+    }
+
+    dropdown?.addEventListener('click', () => {
+		toggleDropdown()
+	})
+
+    const logout = async () => {
+      const res = await fetch(`http://localhost:3000/users/logout`, {
+        method: "GET",
+        credentials: "include"
+      })
+      const data = await res.json()
+      return data
+    }
+
+    btnLogout.addEventListener("click", async () => {
+        if (confirm(`Are you sure to log out?`)) {
+            await logout();
+            window.location.href = "/";
+        }
+        return
+    });
+</script>

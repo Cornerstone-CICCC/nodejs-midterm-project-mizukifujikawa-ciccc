@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { User } from '../types/user'
 import bcrypt from 'bcrypt'
+import { Failure, Success, Result } from '../errors/Result'
 
 class UserModel {
   private users: User[] = []
@@ -39,14 +40,6 @@ class UserModel {
     return user
   }
 
-  async login(username: string, password: string) {
-    const user = this.users.find(u => u.username === username)
-    if (!user) return false
-    const isMatch: boolean = await bcrypt.compare(password, user.password)
-    if (!isMatch) return false
-    return user
-  }
-
   async editUserById(id: string, updates: Partial<User>) {
     const foundIndex = this.users.findIndex(u => u.id === id)
     if (foundIndex === -1) return false
@@ -72,16 +65,19 @@ class UserModel {
     return true
   }
 
-  async checkUserPass(username: string, password: string) {
-    console.log("checkUserPass")
+  async checkUserPass(username: string, password: string): Promise<Result<User, Error>> {
+    console.log('start checkUserPass')
     const user = this.users.find(u => u.username === username)
-    if (!user) return false
+    if (!user) {
+      return new Failure(new Error('User not found'))
+    }
     const isMatch: boolean = await bcrypt.compare(password, user.password)
-    if (!isMatch) return false
-    console.log("user", user)
-    return user
+    if (!isMatch) {
+      return new Failure(new Error('Invalid password'))
+    }
+    console.log('end checkUserPass')
+    return new Success(user)
   }
-  
 }
 
 export default new UserModel

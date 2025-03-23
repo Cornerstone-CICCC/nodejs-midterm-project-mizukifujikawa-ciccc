@@ -1,6 +1,5 @@
 ---
 const { title } = Astro.props;
-import Header from '../components/Header.astro';
 ---
 
 <!DOCTYPE html>
@@ -16,20 +15,21 @@ import Header from '../components/Header.astro';
 			padding: 0;
 		}
 		body {
-			font-family: Arial, sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #fff;
-            margin: 0;
-            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
-		}
+            margin: 0;
+        }
         .container {
-            width: 100%;
-			padding: 80px 20px 20px;
-		}
+            text-align: center;
+            width: 320px;
+        }
     </style>
 </head>
 <body>
-	<Header />
     <div class="container">
         <slot />
     </div>

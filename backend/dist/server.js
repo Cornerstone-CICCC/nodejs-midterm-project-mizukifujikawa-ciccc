@@ -27,7 +27,7 @@ if (!SIGN_KEY || !ENCRYPT_KEY) {
 app.use((0, cookie_session_1.default)({
     name: 'session',
     keys: [SIGN_KEY, ENCRYPT_KEY],
-    maxAge: 5 * 60 * 1000
+    maxAge: 60 * 60 * 1000
 }));
 // Routes
 app.use('/users', user_routes_1.default);

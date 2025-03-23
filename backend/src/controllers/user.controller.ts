@@ -112,20 +112,27 @@ const deleteUserById = (req: Request<{ id: string }>, res: Response) => {
  * @returns {void} Returns cookie and redirect.
  */
 const loginUser = async (req: Request<{}, {}, Partial<User>>, res: Response) => {
+
   const { username, password } = req.body
   if (!username || !password) {
-    res.status(500).send("Username/password is missing!")
+    res.status(400).json({ message: 'Username and password are required' })
     return
   }
+
   const user = await userModel.checkUserPass(username, password)
-  if (!user) {
-    res.status(500).send("Login details are incorrect!")
+
+  if (user.isFailure()) {
+    console.error(`Login failed: ${user.error.message}`)
+    res.status(401).send("Login details are incorrect!")
     return
   }
+
   if (req.session) {
+    console.log('req.session')
     req.session.isLoggedIn = true
-    req.session.username = user.username
+    req.session.username = user.value.username
   }
+
   res.status(200).send("Successfully logged in!")
 }
 
@@ -145,6 +152,7 @@ const logoutUser = (req: Request, res: Response) => {
 
 const checkCookie = (req: Request, res: Response) => {
     if (req.session && req.session.username) {
+      console.log("checkCookie")
         const username = req.session.username
         const user = userModel.findByUsername(username)
         if (!user) {
@@ -153,7 +161,8 @@ const checkCookie = (req: Request, res: Response) => {
         }
         res.status(200).json({
             content: req.session.message,
-            user: user
+            user: user,
+            isLoggedIn: true
         })
         return
     }

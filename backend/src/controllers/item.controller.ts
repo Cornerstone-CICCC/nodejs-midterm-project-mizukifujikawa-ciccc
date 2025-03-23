@@ -22,7 +22,6 @@ const getItems = (req: Request, res: Response) => {
  * @returns {void} Returns one item.
  */
 const getItemById = (req: Request<{ id: string }>, res: Response) => {
-  console.log('getItemById')
   const { id } = req.params
   const item = itemModel.findById(id)
   if (!item) {
@@ -41,7 +40,6 @@ const getItemById = (req: Request<{ id: string }>, res: Response) => {
  */
 const getItemByTitle = (req: Request<{ title: string }>, res: Response) => {
     const { title } = req.params
-    console.log('getItemByTitle')
     const item = itemModel.findByTitle(title)
     if (!item) {
       res.status(404).send('Item not found!')

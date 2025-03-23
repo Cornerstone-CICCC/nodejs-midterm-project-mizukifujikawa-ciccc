@@ -1,0 +1,496 @@
+---
+const response = await fetch("http://localhost:3000/items", { method: "GET" });
+const items = response.ok ? await response.json() : [];
+---
+
+<style>
+    .booklist {
+        box-sizing: border-box;
+        flex-grow: 1;
+        padding: 20px;
+        width: 100%;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .search {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 300px;
+    }
+    .add-item {
+        padding: 10px 0;
+        text-align: right;
+    }
+    .table-container {
+        overflow-x: auto;
+    }
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .table th, .table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+    .table td.book-image {
+        text-align: center;
+    }
+    .table td img {
+        height: auto;
+        width: 100px;
+    }
+
+    .mobile-booklist {
+        display: none;
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        /* max-width: 400px; */
+    }
+
+    .modal form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        width: 100%;
+    }
+
+    .modal label {
+        font-weight: bold;
+    }
+
+    .booklist input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .booklist button {
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .modal-buttons {
+        text-align: right;
+    }
+
+    .add-btn {
+        color: #0c5460;
+        background-color: #d1ecf1;
+    }
+    .add-btn:hover {
+        background-color: #bee5eb
+    }
+    .edit-btn, .submit-button {
+        color: #155724;
+        background-color: #d4edda
+    }
+    .edit-btn, .submit-button:hover {
+        background-color: #c3e6cb
+    }
+    .delete-btn, .close-modal {
+        color: #333;
+        background-color: #ddd
+    }
+    .delete-btn, .close-modal:hover {
+        background-color: #ccc
+    }
+
+    .booklist button:hover {
+        /* background-color: #0056b3; */
+    }
+
+    .modal-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+
+    .hidden {
+        display: none;
+    }
+
+    /* 📌 スマホ向けデザイン */
+    @media (max-width: 768px) {
+        .mobile-booklist {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2列レイアウト */
+            gap: 10px; /* カード間のスペース */
+        }
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .search {
+            width: 100%;
+            max-width: none;
+        }
+        .table {
+            display: none;
+        }
+        .book-card {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .book-card-img {
+            width: 100%;
+            max-width: 120px;
+            margin-bottom: 10px;
+        }
+        .book-card img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .book-card h3, p, button {
+            margin: 10px 0;
+            font-size: 1em;
+        }
+
+        /* 📌 画面幅が狭い場合（スマホの小さい画面用に1列に変更） */
+        @media (max-width: 380px) {
+            .mobile-booklist {
+                grid-template-columns: 1fr; /* 1列表示 */
+            }
+        }
+    }
+</style>
+
+<div class="booklist">
+    <div class="header">
+        <h2>My Book List</h2>
+        <input type="text" class="search" placeholder="Search books..." />
+    </div>
+    <div class="add-item">
+        <button class="add-btn" id="open-modal">+ Add Item</button>
+    </div>
+
+    <div class="modal-overlay hidden" id="modal-overlay">
+        <div class="modal">
+          <h2 class="modal-title">Add New Item</h2>
+          <form class="item-form">
+            <input type="hidden" class="item-id" name="id" />
+            <label>Title:</label>
+            <input type="text" class="book-title" name="title" required />
+
+            <label>Author:</label>
+            <input type="text" class="author" name="author" required />
+
+            <label>Evaluation:</label>
+            <input type="number" class="evaluation" name="evaluation" min="1" max="5" required />
+
+            <label>Image url:</label>
+            <input type="text" class="img-url" name="img_url" />
+
+            <div class="modal-buttons">
+                <button type="submit" class="submit-button">Add</button>
+                <button type="button" class="close-modal">Cancel</button>
+            </div>
+          </form>
+        </div>
+    </div>
+
+    <!-- PC向けテーブル表示 -->
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Evaluation</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {items.map((item: { id: string; title: string; author: string; evaluation: number; img_url: string | null | undefined; }) => (
+                    <tr class="item-container" data-id={item.id}>
+                        <td>{item.title}</td>
+                        <td>{item.author}</td>
+                        <td>{"⭐️".repeat(item.evaluation)}</td>
+                        <td class="book-image">
+                            {item.img_url ? (
+                                <img src={item.img_url} width="50" height="50" alt={item.title} />
+                            ) : (
+                                "No Image"
+                            )}
+                        </td>
+                        <td><button class="edit-btn">Edit</button></td>
+                        <td><button class="delete-btn">Delete</button></td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 📌 スマホ向けカード表示 -->
+    <div class="mobile-booklist">
+        {items.map((item: { id: string; title: string; author: string; evaluation: number; img_url: string | null | undefined; }) => (
+            <div class="book-card" data-id={item.id}>
+                <div class="book-card-img">
+                    {item.img_url ? (
+                        <img src={item.img_url} alt={item.title} />
+                    ) : (
+                        <p>No Image</p>
+                    )}
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.author}</p>
+                <p>{"⭐️".repeat(item.evaluation)}</p>
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
+            </div>
+        ))}
+    </div>
+</div>
+
+<script>
+    const modalOverlay = document.querySelector(".modal-overlay") as HTMLElement;
+    const openModalBtn = document.querySelector(".add-btn") as HTMLButtonElement;
+    const closeModalBtn = document.querySelector(".close-modal") as HTMLButtonElement;
+    const itemForm = document.querySelector(".item-form") as HTMLFormElement;
+    const modalTitle = document.querySelector(".modal-title");
+    const submitButton = document.querySelector(".submit-button");
+
+    const titleInput = document.querySelector(".book-title") as HTMLInputElement;
+    const authorInput = document.querySelector(".author") as HTMLInputElement;
+    const evaluationInput = document.querySelector(".evaluation") as HTMLInputElement;
+    const imgInput = document.querySelector(".img-url") as HTMLInputElement;
+    const itemIdInput = document.querySelector(".item-id") as HTMLInputElement;
+
+    let isEditing = false;
+    let editingItemId: string | null = null;
+
+    if (modalOverlay && openModalBtn && closeModalBtn && itemForm && modalTitle && submitButton && titleInput && authorInput && evaluationInput && imgInput) {
+        openModalBtn.addEventListener("click", () => {
+            isEditing = false;
+            editingItemId = null;
+
+            modalTitle.textContent = "Add New Item";
+            submitButton.textContent = "Add";
+
+            titleInput.value = "";
+            authorInput.value = "";
+            evaluationInput.value = "";
+            imgInput.value = "";
+            modalOverlay.classList.remove("hidden");
+        });
+
+        closeModalBtn.addEventListener("click", () => {
+            modalOverlay.classList.add("hidden");
+        });
+
+        modalOverlay.addEventListener("click", (event) => {
+            if (event.target === modalOverlay) {
+                modalOverlay.classList.add("hidden");
+            }
+        });
+    }
+
+    const addItem = async (data: { [k: string]: FormDataEntryValue; }) => {
+        try {
+            const response = await fetch(`http://localhost:3000/items/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                console.error("Something went wrong to add item")
+                return
+            }
+            console.log("Add item successful!");
+            window.location.reload();
+        } catch (error) {
+            console.error("Add item request failed:", error);
+        }
+    }
+
+    const editItem = async (data: { [k: string]: FormDataEntryValue; }) => {
+        try {
+            const response = await fetch(`http://localhost:3000/items/update/${data.id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                console.error("Something went wrong to edit item")
+                return
+            }
+            console.log("Edit item successful!");
+            window.location.reload();
+        } catch (error) {
+            console.error("Edit item request failed:", error);
+        }
+    }
+
+    const deleteItem = async (id: string) => {
+        try {
+            const response = await fetch(`http://localhost:3000/items/delete/${id}`, {
+                method: "GET"
+            });
+
+            if (!response.ok) {
+                console.error("Something went wrong to delete item")
+                return
+            }
+            console.log("Delete item successful!");
+            window.location.reload();
+        } catch (error) {
+            console.error("Delete item request failed:", error);
+        }
+    }
+
+    itemForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const addFormData = new FormData(itemForm);
+        const data = Object.fromEntries(addFormData.entries());
+
+        try {
+            if (isEditing && editingItemId) {
+                await editItem(data);
+            } else {
+                await addItem(data);
+            }
+        } catch (error) {
+            console.error("Error updating or adding item:", error);
+        }
+
+        modalOverlay.classList.add("hidden");
+    });
+
+
+    // 📌 Editボタンの処理
+    document.querySelectorAll(".edit-btn").forEach(button => {
+        button.addEventListener("click", (event) => {
+            isEditing = true;
+
+            const target = event.target as HTMLElement | null;
+            if (!target) return;
+
+            let title: HTMLElement | null = null;
+            let author: HTMLElement | null = null;
+            let evaluation: HTMLElement | null = null;
+            let imgUrl: HTMLElement | null = null;
+            let itemId: string | null = null;
+
+            // 📌 PC版（テーブル内のデータ取得）
+            const row = target.closest("tr");
+            if (row) {
+                title = row.querySelector("td:nth-child(1)");
+                author = row.querySelector("td:nth-child(2)");
+                evaluation = row.querySelector("td:nth-child(3)");
+                imgUrl = row.querySelector("td:nth-child(4) img");
+                itemId = row.getAttribute("data-id");
+            }
+
+            // 📌 スマホ版（book-card内のデータ取得）
+            const card = target.closest(".book-card");
+            if (card) {
+                title = card.querySelector("h3");
+                author = card.querySelector("p:nth-of-type(1)");
+                evaluation = card.querySelector("p:nth-of-type(2)");
+                imgUrl = card.querySelector(".book-card-img img");
+                itemId = card.getAttribute("data-id");
+            }
+
+            // フォームにデータをセット
+            if (!title || !author || !evaluation) return;
+            titleInput.value = title.textContent || "";
+            authorInput.value = author.textContent || "";
+            evaluationInput.value = ((evaluation.textContent?.length || 0) / 2).toString();
+            imgInput.value = imgUrl?.getAttribute("src") || "";
+            itemIdInput.value = itemId || "";
+            editingItemId = itemId || "";
+
+            // モーダルの設定
+            if (modalTitle && submitButton){
+                modalTitle.textContent = "Edit Item";
+                submitButton.textContent = "Update";
+            }
+
+            // モーダルを開く
+            modalOverlay.classList.remove("hidden");
+        });
+    });
+
+    // 削除処理
+    document.querySelectorAll(".delete-btn").forEach(button => {
+        button.addEventListener("click", async (event) => {
+            if (!confirm(`Are you sure to delete this item?`)) return;
+
+            const target = event.target as HTMLElement | null;
+            if (!target) return;
+
+            let itemId: string | null = null;
+            // 📌 PC版（テーブル内のデータ取得）
+            const row = target.closest("tr");
+            if (row) {
+                itemId = row.getAttribute("data-id");
+            }
+
+            // 📌 スマホ版（book-card内のデータ取得）
+            const card = target.closest(".book-card");
+            if (card) {
+                itemId = card.getAttribute("data-id");
+            }
+
+            if (!itemId) return;
+            await deleteItem(itemId);
+        });
+    });
+
+  </script>

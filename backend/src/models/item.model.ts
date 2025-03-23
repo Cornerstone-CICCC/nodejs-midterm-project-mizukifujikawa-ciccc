@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
 import { Item } from '../types/item'
-import bcrypt from 'bcrypt'
 
 class ItemModel {
   private items: Item[] = [

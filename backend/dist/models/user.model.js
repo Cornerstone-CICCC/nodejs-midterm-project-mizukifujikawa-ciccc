@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const uuid_1 = require("uuid");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const Result_1 = require("../errors/Result");
 class UserModel {
     constructor() {
         this.users = [];
@@ -53,17 +54,6 @@ class UserModel {
             return user;
         });
     }
-    login(username, password) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const user = this.users.find(u => u.username === username);
-            if (!user)
-                return false;
-            const isMatch = yield bcrypt_1.default.compare(password, user.password);
-            if (!isMatch)
-                return false;
-            return user;
-        });
-    }
     editUserById(id, updates) {
         return __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c;
@@ -88,15 +78,17 @@ class UserModel {
     }
     checkUserPass(username, password) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("checkUserPass");
+            console.log('start checkUserPass');
             const user = this.users.find(u => u.username === username);
-            if (!user)
-                return false;
+            if (!user) {
+                return new Result_1.Failure(new Error('User not found'));
+            }
             const isMatch = yield bcrypt_1.default.compare(password, user.password);
-            if (!isMatch)
-                return false;
-            console.log("user", user);
-            return user;
+            if (!isMatch) {
+                return new Result_1.Failure(new Error('Invalid password'));
+            }
+            console.log('end checkUserPass');
+            return new Result_1.Success(user);
         });
     }
 }

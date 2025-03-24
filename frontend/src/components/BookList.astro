@@ -16,6 +16,9 @@ const items = response.ok ? await response.json() : [];
         align-items: center;
         margin-bottom: 20px;
     }
+    .search-contents {
+        display: flex;
+    }
     .search {
         padding: 8px;
         border: 1px solid #ccc;
@@ -149,12 +152,11 @@ const items = response.ok ? await response.json() : [];
         display: none;
     }
 
-    /* 📌 スマホ向けデザイン */
     @media (max-width: 768px) {
         .mobile-booklist {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2列レイアウト */
-            gap: 10px; /* カード間のスペース */
+            grid-template-columns: repeat(2, 1fr); /* 2列 */
+            gap: 10px;
         }
         .header {
             flex-direction: column;
@@ -194,7 +196,6 @@ const items = response.ok ? await response.json() : [];
             font-size: 1em;
         }
 
-        /* 📌 画面幅が狭い場合（スマホの小さい画面用に1列に変更） */
         @media (max-width: 380px) {
             .mobile-booklist {
                 grid-template-columns: 1fr; /* 1列表示 */
@@ -206,7 +207,10 @@ const items = response.ok ? await response.json() : [];
 <div class="booklist">
     <div class="header">
         <h2>My Book List</h2>
-        <input type="text" class="search" placeholder="Search books..." />
+        <div class="search-contents">
+            <input type="text" class="search" placeholder="Search books..." />
+            <button>Search</button>
+        </div>
     </div>
     <div class="add-item">
         <button class="add-btn" id="open-modal">+ Add Item</button>
@@ -271,7 +275,7 @@ const items = response.ok ? await response.json() : [];
         </table>
     </div>
 
-    <!-- 📌 スマホ向けカード表示 -->
+    <!-- スマホ向けカード表示 -->
     <div class="mobile-booklist">
         {items.map((item: { id: string; title: string; author: string; evaluation: number; img_url: string | null | undefined; }) => (
             <div class="book-card" data-id={item.id}>
@@ -413,7 +417,7 @@ const items = response.ok ? await response.json() : [];
     });
 
 
-    // 📌 Editボタンの処理
+    // Editボタンの処理
     document.querySelectorAll(".edit-btn").forEach(button => {
         button.addEventListener("click", (event) => {
             isEditing = true;
@@ -427,7 +431,7 @@ const items = response.ok ? await response.json() : [];
             let imgUrl: HTMLElement | null = null;
             let itemId: string | null = null;
 
-            // 📌 PC版（テーブル内のデータ取得）
+            // PC版
             const row = target.closest("tr");
             if (row) {
                 title = row.querySelector("td:nth-child(1)");
@@ -437,7 +441,7 @@ const items = response.ok ? await response.json() : [];
                 itemId = row.getAttribute("data-id");
             }
 
-            // 📌 スマホ版（book-card内のデータ取得）
+            // スマホ版
             const card = target.closest(".book-card");
             if (card) {
                 title = card.querySelector("h3");
@@ -476,13 +480,13 @@ const items = response.ok ? await response.json() : [];
             if (!target) return;
 
             let itemId: string | null = null;
-            // 📌 PC版（テーブル内のデータ取得）
+            // PC版
             const row = target.closest("tr");
             if (row) {
                 itemId = row.getAttribute("data-id");
             }
 
-            // 📌 スマホ版（book-card内のデータ取得）
+            // スマホ版
             const card = target.closest(".book-card");
             if (card) {
                 itemId = card.getAttribute("data-id");

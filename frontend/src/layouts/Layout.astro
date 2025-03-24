@@ -1,0 +1,37 @@
+---
+const { title } = Astro.props;
+import Header from '../components/Header.astro';
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title || "My App"}</title>
+    <style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			font-family: Arial, sans-serif;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+		}
+        .container {
+            width: 100%;
+			padding: 80px 20px 20px;
+		}
+    </style>
+</head>
+<body>
+	<Header />
+    <div class="container">
+        <slot />
+    </div>
+</body>
+</html>
